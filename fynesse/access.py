@@ -60,3 +60,12 @@ class HealthDataLoader:
 
     def get_sexual_violence(self):
         return self.sexual_violence_df
+def merge_dfs_to_gdf(gdf, dfs, key="County"):
+    """
+    Merge multiple pandas DataFrames into a GeoDataFrame on a common key.
+    """
+    merged = gdf.copy()
+    for i, df in enumerate(dfs, 1):
+        merged = merged.merge(df, on=key, how="left", suffixes=("", f"_{i}"))
+    return merged
+
