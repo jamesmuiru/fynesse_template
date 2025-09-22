@@ -42,13 +42,21 @@ class HealthDataLoader:
         self.less_than3_nursefacilities_df = pd.read_csv(self.level2_nurse_facilities)
         self.sexual_violence_df = pd.read_csv(self.sexual_violence)
 
-        return self
+    # ---- Accessor Methods ----
+    def get_county_boundaries(self):
+        return self.county_boundaries_df
 
-    def summary(self):
-        """Quickly print summaries of the loaded data."""
-        print("County Boundaries:\n", self.county_boundaries_df.head())
-        print("\nFacilities:\n", self.facilities_df.head())
-        print("\nProjected Population:\n", self.projected_population_df.head())
-        print("\nTeen Pregnancy:\n", self.teen_pregnancy_df.head())
-        print("\nLow Nurse Facilities:\n", self.less_than3_nursefacilities_df.head())
-        print("\nSexual Violence:\n", self.sexual_violence_df.head())
+    def get_facilities(self):
+        return self.facilities_df
+
+    def get_projected_population(self):
+        return self.projected_population_df
+
+    def get_teen_pregnancy(self):
+        return self.teen_pregnancy_df
+
+    def get_low_staff_facilities(self):
+        return self.less_than3_nursefacilities_df
+
+    def get_sexual_violence(self):
+        return self.sexual_violence_df
