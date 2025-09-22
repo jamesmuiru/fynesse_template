@@ -1,29 +1,22 @@
 # access.py
 import geopandas as gpd
 import pandas as pd
-import os
-import requests
-import zipfile
 
 class HealthDataLoader:
-    def __init__(self, shapefile_zip_url=None):
+    def __init__(self):
         """
-        Initialize the data loader with GitHub CSV paths.
-        Optionally download and extract a shapefile zip from GitHub.
+        Load GeoPackage and CSV datasets directly from GitHub raw URLs.
         """
-        # GitHub raw URLs for CSV datasets
-        base_url = "https://raw.githubusercontent.com/jamesmuiru/mlfccourse/main/csvs"
-        self.health_facilities_data = f"{base_url}/facilities_data.csv"
-        self.projected_population_2025 = f"{base_url}/projected_population_2025.csv"
-        self.teen_pregnancy_bycounty = f"{base_url}/teen_pregnacy_dataByCounty.csv"
-        self.level2_nurse_facilities = f"{base_url}/level2_lessthan3nursesfacilities_nurses.csv"
-        self.sexual_violence = f"{base_url}/sexual_violence.csv"
+        # GitHub raw URL for GeoPackage
+        self.gpkg_url = "https://raw.githubusercontent.com/jamesmuiru/mlfccourse/main/csvs/county_with_raster_means.gpkg"
 
-        # Optional shapefile zip URL
-        self.shapefile_zip_url = shapefile_zip_url
-        self.shapefile_dir = "shapefile"
-        self.county_shapefile = os.path.join(self.shapefile_dir, "county_with_raster_means.shp")
-        self.gpkg_file = os.path.join(self.shapefile_dir, "county_boundaries.gpkg")
+        # GitHub raw URLs for CSV datasets
+        base_csv_url = "https://raw.githubusercontent.com/jamesmuiru/mlfccourse/main/csvs"
+        self.health_facilities_data = f"{base_csv_url}/facilities_data.csv"
+        self.projected_population_2025 = f"{base_csv_url}/projected_population_2025.csv"
+        self.teen_pregnancy_bycounty = f"{base_csv_url}/teen_pregnacy_dataByCounty.csv"
+        self.level2_nurse_facilities = f"{base_csv_url}/level2_lessthan3nursesfacilities_nurses.csv"
+        self.sexual_violence = f"{base_csv_url}/sexual_violence.csv"
 
         # Placeholders for loaded data
         self.county_boundaries_df = None
@@ -33,37 +26,12 @@ class HealthDataLoader:
         self.less_than3_nursefacilities_df = None
         self.sexual_violence_df = None
 
-    def download_and_extract_shapefile(self):
-        """Download shapefile zip from GitHub and extract it."""
-        if not self.shapefile_zip_url:
-            raise ValueError("No shapefile zip URL provided.")
-        
-        os.makedirs(self.shapefile_dir, exist_ok=True)
-        zip_path = os.path.join(self.shapefile_dir, "shapefile.zip")
-        
-        # Download
-        r = requests.get(self.shapefile_zip_url)
-        r.raise_for_status()
-        with open(zip_path, "wb") as f:
-            f.write(r.content)
-        
-        # Extract
-        with zipfile.ZipFile(zip_path, "r") as zip_ref:
-            zip_ref.extractall(self.shapefile_dir)
-
     def load_data(self):
         """Load all datasets into memory."""
-        # 1️⃣ Shapefile
-        if self.shapefile_zip_url:
-            self.download_and_extract_shapefile()
-            # Load shapefile
-            self.county_boundaries_df = gpd.read_file(self.county_shapefile)
-            
-            # Convert to GeoPackage for cleaner columns
-            self.county_boundaries_df.to_file(self.gpkg_file, driver="GPKG")
-            self.county_boundaries_df = gpd.read_file(self.gpkg_file)
+        # Load GeoPackage directly
+        self.county_boundaries_df = gpd.read_file(self.gpkg_url)
 
-        # 2️⃣ CSV datasets
+        # Load CSV datasets
         self.facilities_df = pd.read_csv(self.health_facilities_data)
         self.projected_population_df = pd.read_csv(self.projected_population_2025)
         self.teen_pregnancy_df = pd.read_csv(self.teen_pregnancy_bycounty)
