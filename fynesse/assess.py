@@ -91,5 +91,38 @@ def plot_gdf_column(gdf, column, plot_type="bar", top_n=None, figsize=(12,6), ti
     plt.tight_layout()
     plt.show()
 
+def plot_gdf_correlation(gdf, exclude_cols=None):
+    """
+    Generate a correlation heatmap for numeric columns in a GeoDataFrame.
+
+    Parameters:
+        gdf (GeoDataFrame): The GeoDataFrame containing county-level data.
+        exclude_cols (list): Columns to exclude from correlation calculation.
+    """
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+
+    if exclude_cols is None:
+        exclude_cols = ['Shape_Leng', 'Shape_Area', 'ADM1_PCODE', 'ADM1_REF', 
+                        'ADM1ALT1EN', 'ADM1ALT2EN', 'ADM0_EN', 'ADM0_PCODE', 
+                        'date', 'validOn', 'validTo']
+
+    # Select numeric columns excluding the ones in exclude_cols
+    numeric_cols = gdf.select_dtypes(include='number').columns
+    numeric_cols = [col for col in numeric_cols if col not in exclude_cols]
+
+    # Compute correlation matrix
+    corr = gdf[numeric_cols].corr()
+
+    # Plot heatmap
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm', cbar=True, square=True)
+    plt.title("Correlation Heatmap of Numeric County Indicators", fontsize=16)
+    plt.xticks(rotation=45, ha='right')
+    plt.yticks(rotation=0)
+    plt.tight_layout()
+    plt.show()
+
+
 
 
