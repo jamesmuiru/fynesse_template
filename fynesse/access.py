@@ -4,7 +4,6 @@ import pandas as pd
 import os
 import requests
 import zipfile
-import glob
 
 class HealthDataLoader:
     def __init__(self, shapefile_zip_url=None):
@@ -23,7 +22,8 @@ class HealthDataLoader:
         # Optional shapefile zip URL
         self.shapefile_zip_url = shapefile_zip_url
         self.shapefile_dir = "shapefile"
-        self.county_shapefile = None  # will be set dynamically
+        self.county_shapefile = os.path.join(self.shapefile_dir, "county_with_raster_means.shp")
+        self.gpkg_file = os.path.join(self.shapefile_dir, "county_boundaries.gpkg")
 
         # Placeholders for loaded data
         self.county_boundaries_df = None
@@ -50,19 +50,18 @@ class HealthDataLoader:
         # Extract
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(self.shapefile_dir)
-        
-        # Find shapefile (.shp)
-        shp_files = glob.glob(os.path.join(self.shapefile_dir, "*.shp"))
-        if not shp_files:
-            raise FileNotFoundError("No .shp file found in the extracted zip.")
-        self.county_shapefile = shp_files[0]  # pick the first one
 
     def load_data(self):
         """Load all datasets into memory."""
         # 1️⃣ Shapefile
         if self.shapefile_zip_url:
             self.download_and_extract_shapefile()
+            # Load shapefile
             self.county_boundaries_df = gpd.read_file(self.county_shapefile)
+            
+            # Convert to GeoPackage for cleaner columns
+            self.county_boundaries_df.to_file(self.gpkg_file, driver="GPKG")
+            self.county_boundaries_df = gpd.read_file(self.gpkg_file)
 
         # 2️⃣ CSV datasets
         self.facilities_df = pd.read_csv(self.health_facilities_data)
