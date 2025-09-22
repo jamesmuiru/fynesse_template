@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import requests
 import zipfile
+import glob
 
 class HealthDataLoader:
     def __init__(self, shapefile_zip_url=None):
@@ -22,7 +23,7 @@ class HealthDataLoader:
         # Optional shapefile zip URL
         self.shapefile_zip_url = shapefile_zip_url
         self.shapefile_dir = "shapefile"
-        self.county_shapefile = os.path.join(self.shapefile_dir, "county_with_raster_means.shp")
+        self.county_shapefile = None  # will be set dynamically
 
         # Placeholders for loaded data
         self.county_boundaries_df = None
@@ -42,12 +43,19 @@ class HealthDataLoader:
         
         # Download
         r = requests.get(self.shapefile_zip_url)
+        r.raise_for_status()
         with open(zip_path, "wb") as f:
             f.write(r.content)
         
         # Extract
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(self.shapefile_dir)
+        
+        # Find shapefile (.shp)
+        shp_files = glob.glob(os.path.join(self.shapefile_dir, "*.shp"))
+        if not shp_files:
+            raise FileNotFoundError("No .shp file found in the extracted zip.")
+        self.county_shapefile = shp_files[0]  # pick the first one
 
     def load_data(self):
         """Load all datasets into memory."""
