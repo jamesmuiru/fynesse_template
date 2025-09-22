@@ -1,4 +1,4 @@
-# assess.py
+# access.py
 import geopandas as gpd
 import pandas as pd
 
@@ -6,7 +6,6 @@ class HealthDataLoader:
     def __init__(self, base_path="/content/drive/MyDrive/Miniproject"):
         """
         Initialize the data loader with default paths.
-        You can override base_path if files are stored elsewhere.
         """
         self.base_path = base_path
 
@@ -32,7 +31,7 @@ class HealthDataLoader:
         # Load county shapefile
         self.county_boundaries_df = gpd.read_file(self.county_shapefile)
 
-        # Convert to GPKG to avoid truncation and reload
+        # Convert to GPKG to avoid column truncation and reload
         self.county_boundaries_df.to_file(self.gpkg_file, driver="GPKG")
         self.county_boundaries_df = gpd.read_file(self.gpkg_file)
 
@@ -43,7 +42,7 @@ class HealthDataLoader:
         self.less_than3_nursefacilities_df = pd.read_csv(self.level2_nurse_facilities)
         self.sexual_violence_df = pd.read_csv(self.sexual_violence)
 
-        return self  # so you can chain methods if needed
+        return self
 
     def summary(self):
         """Quickly print summaries of the loaded data."""
@@ -53,4 +52,3 @@ class HealthDataLoader:
         print("\nTeen Pregnancy:\n", self.teen_pregnancy_df.head())
         print("\nLow Nurse Facilities:\n", self.less_than3_nursefacilities_df.head())
         print("\nSexual Violence:\n", self.sexual_violence_df.head())
-
